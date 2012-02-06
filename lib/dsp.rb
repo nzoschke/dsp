@@ -13,15 +13,15 @@ module DSP
       next if data.select { |k,v| pattern.keys.include? k } != pattern
 
       buff = buffer(id)
-      if period <= 0  # copy
+      if period == nil  # copy
         buff << data
-      else            # sample
+      else              # sample
         l = buff.last
         bin = (data[:__time] / period.to_f).floor
         if l && l[:__bin] == bin
           l[:num] += 1
         else
-          data = { id => true, :num => 1, :__time => data[:__time], :__bin => bin }
+          data = { id => true, num: 1, __time: data[:__time], __bin: bin }
           buff << data
         end
       end
@@ -98,6 +98,6 @@ module DSP
     @@filters   = nil
     @@callbacks = nil
 
-    filter(:all, 0, {}) # every log goes to :all buffer
+    filter(:all, nil, {}) # every log goes to :all buffer
   end
 end
