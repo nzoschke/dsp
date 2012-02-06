@@ -13,7 +13,8 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_log_time
-    DSP.log(a: true, __time: Time.now.to_i)
+    DSP.log(a: true)
+    assert DSP.buffer.last[:__time] > 0
   end
 
   def test_filter
