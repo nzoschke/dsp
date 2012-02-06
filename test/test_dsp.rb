@@ -16,8 +16,8 @@ class TestDSP < MiniTest::Unit::TestCase
     DSP.log(a: true, __time: Time.now.to_i)
   end
 
-  def test_sample
-    DSP.sample(:execs_per_min, 60, { exec: true, at: :start })
+  def test_filter
+    DSP.filter(:execs_per_min, 60, { exec: true, at: :start })
 
     DSP.log(exec: true, at: :start,   __time: 0)
     DSP.log(exec: true, at: :finish,  __time: 1)

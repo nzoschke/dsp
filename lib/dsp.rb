@@ -7,7 +7,7 @@ module DSP
     buffer << data
 
     # accumulate patterns that match
-    samples.each do |id, opts|
+    filters.each do |id, opts|
       period  = opts[:period]
       pattern = opts[:pattern]
 
@@ -74,8 +74,8 @@ module DSP
     callbacks[id] = { :cond => cond, :blk => blk }
   end
 
-  def sample(id, period, pattern)
-    samples[id] = { :period => period, :pattern => pattern }
+  def filter(id, period, pattern)
+    filters[id] = { :period => period, :pattern => pattern }
   end
 
   def buffers
@@ -86,13 +86,13 @@ module DSP
     @@callbacks ||= {}
   end
 
-  def samples
-    @@samples ||= {}
+  def filters
+    @@filters ||= {}
   end
 
   def reset
     @@buffers   = nil
-    @@samples   = nil
+    @@filters   = nil
     @@callbacks = nil
   end
 end
