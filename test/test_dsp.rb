@@ -49,4 +49,14 @@ class TestDSP < MiniTest::Unit::TestCase
     DSP.add_io :logger,   ["logger"]
     DSP.add_io :messages, "log/messages"
   end
+
+  def test_routing
+    DSP.add_io :stdout,   STDOUT
+    DSP.add_io :logger,   ["logger"]
+    DSP.add_io :messages, "log/messages"
+
+    DSP.callback(:all) { |b| DSP.ios[:messages].puts b.last }
+
+    DSP.log(__time: 0)
+  end
 end

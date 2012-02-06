@@ -73,7 +73,8 @@ module DSP
     buffers[id] ||= []
   end
 
-  def callback(id, cond, &blk)
+  def callback(id, cond=nil, &blk)
+    cond ||= lambda { true }
     callbacks[id] = { :cond => cond, :blk => blk }
   end
 
@@ -81,13 +82,13 @@ module DSP
     filters[id] = { :period => period, :pattern => pattern }
   end
 
-  def add_io(id, dev)
+  def add_io(id, dev, opts={})
     if dev.is_a? IO
       ios[id] = dev
     elsif dev.is_a? Array
-      ios[id] = IO.popen(dev, mode="w")
+      ios[id] = IO.popen(dev, mode=opts[:mode] || "w")
     elsif dev.is_a? String
-      ios[id] = File.open(dev, mode="a")
+      ios[id] = File.open(dev, mode=opts[:mode] || "a")
     end
   end
 
