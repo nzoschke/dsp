@@ -41,6 +41,9 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_callback
-    DSP.callback(:all, lambda { true }) { |b| STDOUT.puts b.last }
+    buffer = []
+    DSP.callback(:all, lambda { true }) { |b| buffer << b.last }
+    DSP.log(__time: 0)
+    assert_equal [{:__time=>0}], buffer
   end
 end
