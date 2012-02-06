@@ -33,15 +33,14 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_route_file
-  end
-
-  def test_route_io
-  end
-
-  def test_rotate
+    skip
+    DSP.route(:all,         "log/messages")
+    DSP.route(:exceptions,  "log/exceptions")
+    DSP.route([:execs_per_min, :avg_exec_time],  "log/stats")
+    DSP.route(:all,         ["logger"])
   end
 
   def test_callback
+    DSP.callback(:all, lambda { true }) { |b| STDOUT.puts b.last }
   end
-
 end
