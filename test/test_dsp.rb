@@ -3,8 +3,17 @@ require "./lib/dsp"
 require "./test/minitest_helper.rb"
 
 class TestDSP < MiniTest::Unit::TestCase
+  def setup
+    DSP.reset
+  end
+
   def test_sanity
     assert true
+  end
+
+  def test_log_datas
+    DSP.log({ a: true, b: true }, { foo: :bar }, { foo: :baz })
+    assert_equal [{ a: true, b: true, foo: :baz }], DSP.buffer
   end
 
   def test_log_data
