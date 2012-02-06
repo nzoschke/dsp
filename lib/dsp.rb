@@ -81,6 +81,16 @@ module DSP
     filters[id] = { :period => period, :pattern => pattern }
   end
 
+  def add_io(id, dev)
+    if dev.is_a? IO
+      ios[id] = dev
+    elsif dev.is_a? Array
+      ios[id] = IO.popen(dev, mode="w")
+    elsif dev.is_a? String
+      ios[id] = File.open(dev, mode="a")
+    end
+  end
+
   def buffers
     @@buffers ||= {}
   end
@@ -93,11 +103,20 @@ module DSP
     @@filters ||= {}
   end
 
+  def ios
+    @@ios ||= {}
+  end
+
   def reset
     @@buffers   = nil
-    @@filters   = nil
     @@callbacks = nil
+    @@filters   = nil
+    @@ios       = nil
 
     filter(:all, nil, {}) # every log goes to :all buffer
+  end
+
+  def close
+    ios.each { |id, dev| dev.close unless dev == STDOUT }
   end
 end

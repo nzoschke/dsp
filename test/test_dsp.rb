@@ -7,6 +7,10 @@ class TestDSP < MiniTest::Unit::TestCase
     DSP.reset
   end
 
+  def teardown
+    DSP.close
+  end
+
   def test_log_datas
     DSP.log({ a: true, b: true }, { foo: :bar }, { foo: :baz }, { __time: 0 })
     assert_equal [{ a: true, b: true, foo: :baz, __time: 0 }], DSP.buffer
@@ -38,5 +42,11 @@ class TestDSP < MiniTest::Unit::TestCase
     DSP.callback(:all, lambda { true }) { |b| buffer << b.last }
     DSP.log(__time: 0)
     assert_equal [{:__time=>0}], buffer
+  end
+
+  def test_io
+    DSP.add_io :stdout,   STDOUT
+    DSP.add_io :logger,   ["logger"]
+    DSP.add_io :messages, "log/messages"
   end
 end
