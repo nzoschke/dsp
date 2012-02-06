@@ -2,5 +2,5 @@ source :gemcutter
 
 group :test do
   gem "minitest"
-  gem "turn"
+  gem "turn", :require => false
 end
