@@ -51,12 +51,11 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_routing
-    DSP.add_io :stdout,   STDOUT
-    DSP.add_io :logger,   ["logger"]
-    DSP.add_io :messages, "log/messages"
-
-    DSP.callback(:all) { |b| DSP.ios[:messages].puts b.last }
+    path = "log/messages"
+    DSP.add_io :messages, path, mode: "w"
+    DSP.callback(:all) { |b| io = DSP.ios[:messages]; io.puts DSP.unparse(b.last); io.flush }
 
     DSP.log(__time: 0)
+    assert_equal "__time=0\n", File.read(path)
   end
 end
