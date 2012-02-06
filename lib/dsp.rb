@@ -7,7 +7,10 @@ module DSP
     buffer << data
 
     # accumulate patterns that match
-    samples.each do |id, period, pattern|
+    samples.each do |id, opts|
+      period  = opts[:period]
+      pattern = opts[:pattern]
+
       next if data.select { |k,v| pattern.keys.include? k } != pattern
 
       b = buffer(id)
@@ -72,7 +75,7 @@ module DSP
   end
 
   def sample(id, period, pattern)
-    samples << [id, period, pattern]
+    samples[id] = { :period => period, :pattern => pattern }
   end
 
   def buffers
@@ -84,7 +87,7 @@ module DSP
   end
 
   def samples
-    @@samples ||= []
+    @@samples ||= {}
   end
 
   def reset
