@@ -3,6 +3,7 @@ module DSP
 
   def log(*datas)
     data = datas.inject(:merge)
+    data[:__time] ||= Time.now.to_f
     buffer << data
 
     samples.each do |id, period, pattern|

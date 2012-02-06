@@ -8,8 +8,8 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_log_datas
-    DSP.log({ a: true, b: true }, { foo: :bar }, { foo: :baz })
-    assert_equal [{ a: true, b: true, foo: :baz }], DSP.buffer
+    DSP.log({ a: true, b: true }, { foo: :bar }, { foo: :baz }, { __time: 0 })
+    assert_equal [{ a: true, b: true, foo: :baz, __time: 0 }], DSP.buffer
   end
 
   def test_log_time
