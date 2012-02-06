@@ -62,9 +62,13 @@ module DSP
     end.compact.join(" ")
   end
 
-  # Internal Storage
+  # Internal Storage / Processing
   def buffer(id=:all)
     buffers[id] ||= []
+  end
+
+  def callback(id, cond, &blk)
+    callbacks[id] = { :cond => cond, :blk => blk }
   end
 
   def sample(id, period, pattern)
@@ -75,21 +79,17 @@ module DSP
     @@buffers ||= {}
   end
 
+  def callbacks
+    @@callbacks ||= {}
+  end
+
   def samples
     @@samples ||= []
   end
 
   def reset
-    @@buffers = nil
-    @@samples = nil
-  end
-
-  # Internal Processing
-  def callbacks
-    @@callbacks ||= {}
-  end
-
-  def callback(id, cond, &blk)
-    callbacks[id] = { :cond => cond, :blk => blk }
+    @@buffers   = nil
+    @@samples   = nil
+    @@callbacks = nil
   end
 end
