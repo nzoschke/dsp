@@ -4,27 +4,30 @@ module DSP
   def log(*datas)
     data = datas.inject(:merge)
     data[:__time] ||= Time.now.to_f
-    buffer << data
 
-    # accumulate patterns that match
+    # filter (copy or sample) logs into buffers
     filters.each do |id, opts|
       period  = opts[:period]
       pattern = opts[:pattern]
 
       next if data.select { |k,v| pattern.keys.include? k } != pattern
 
-      b = buffer(id)
-      l = b.last
-      bin = (data[:__time] / period.to_f).floor
-      if l && l[:__bin] == bin
-        l[:num] += 1
-      else
-        data = { id => true, :num => 1, :__time => data[:__time], :__bin => bin }
-        b << data
+      buff = buffer(id)
+      if period <= 0  # copy
+        buff << data
+      else            # sample
+        l = buff.last
+        bin = (data[:__time] / period.to_f).floor
+        if l && l[:__bin] == bin
+          l[:num] += 1
+        else
+          data = { id => true, :num => 1, :__time => data[:__time], :__bin => bin }
+          buff << data
+        end
       end
     end
 
-    # call any callbacks (write, rotate, flush, store)
+    # call any callbacks (write, flush, rotate, store)
     callbacks.each do |id, c|
       buff = buffer(id)
       cond = c[:cond]
@@ -94,5 +97,7 @@ module DSP
     @@buffers   = nil
     @@filters   = nil
     @@callbacks = nil
+
+    filter(:all, 0, {}) # every log goes to :all buffer
   end
 end
