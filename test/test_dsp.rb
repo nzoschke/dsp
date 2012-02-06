@@ -26,8 +26,16 @@ class TestDSP < MiniTest::Unit::TestCase
     DSP.log(exec: true, at: :start,   __time: 60)
     DSP.log(exec: true, at: :finish,  __time: 61)
 
-    assert_equal [{ execs_per_min: true, num: 3 }], DSP.buffer(:execs_per_min)
-    #assert_equal [{ num: 2 }, { num: 1 }], DSP.buffer(:execs_per_min)
+    assert_equal [
+      { execs_per_min: true, num: 1, __time: 0  },
+      { execs_per_min: true, num: 1, __time: 2  },
+      { execs_per_min: true, num: 1, __time: 60 }
+    ], DSP.buffer(:execs_per_min)
+
+    assert_equal [
+      { execs_per_min: true, num: 2, __time: 0  },
+      { execs_per_min: true, num: 1, __time: 60 }
+    ], DSP.reduce(:execs_per_min)
   end
 
   def test_route_file

@@ -8,9 +8,22 @@ module DSP
     samples.each do |id, period, pattern|
       next if data.select { |k,v| pattern.keys.include? k } != pattern
 
-      buffers[id] ||= [{ id => true, :num => 0 }]
-      buffers[id].last[:num] += 1
+      buffer(id) << { id => true, :num => 1, :__time => data[:__time] }
     end
+  end
+
+  # Map / Reduce
+  def reduce(sample_id)
+    reduced = {}
+    buffer(:execs_per_min).each do |r|
+      t = (r[:__time] / 60.0).floor
+      if !reduced[t]
+        reduced[t] = r
+      else
+        reduced[t][:num] += r[:num]
+      end
+    end
+    reduced.values
   end
 
   # Internal Storage
