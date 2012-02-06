@@ -10,9 +10,10 @@ module DSP
       next if data.select { |k,v| pattern.keys.include? k } != pattern
 
       b = buffer(id)
+      l = b.last
       bin = (data[:__time] / period.to_f).floor
-      if b.last && b.last[:__bin] == bin
-        b.last[:num] += 1
+      if l && l[:__bin] == bin
+        l[:num] += 1
       else
         b << { id => true, :num => 1, :__time => data[:__time], :__bin => bin }
       end
