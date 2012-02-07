@@ -65,12 +65,12 @@ module DSP
     DSP[id] = buffers[id]
   end
 
-  def callback(id, cond=nil, &blk)
+  def add_callback(id, cond=nil, &blk)
     cond ||= lambda { true }
     callbacks[id] = { :cond => cond, :blk => blk }
   end
 
-  def filter(id, period=nil, &blk)
+  def add_filter(id, period=nil, &blk)
     filters[id] = { :period => period, :blk => blk }
   end
 
@@ -108,7 +108,7 @@ module DSP
     @@filters   = nil
     @@ios       = nil
 
-    filter(:all) # every log goes to :all buffer
+    add_filter(:all) # every log goes to :all buffer
   end
 
   def close

@@ -22,7 +22,7 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_counter
-    DSP.filter(:exec_per_min, 60) do |acc, data|
+    DSP.add_filter(:exec_per_min, 60) do |acc, data|
       next unless data.match(exec: true, at: :start)
       acc[:num] ||= 0
       acc[:num]  += 1
@@ -44,7 +44,7 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_averager
-    DSP.filter(:exec_time, 60) do |acc, data|
+    DSP.add_filter(:exec_time, 60) do |acc, data|
       next unless data.match(exec: true, at: /finish|error/, elapsed: /./)
 
       acc[:num]     ||= 0 # defaults
@@ -74,7 +74,7 @@ class TestDSP < MiniTest::Unit::TestCase
 
   def test_callback
     buffer = []
-    DSP.callback(:all, lambda { true }) { |b| buffer << b.last }
+    DSP.add_callback(:all, lambda { true }) { |b| buffer << b.last }
     DSP.log(__time: 0)
     assert_equal [{:__time=>0}], buffer
   end
@@ -88,7 +88,7 @@ class TestDSP < MiniTest::Unit::TestCase
   def test_routing
     path = "log/messages"
     DSP.add_io :messages, path, mode: "w"
-    DSP.callback(:all) { |b| DSP[:messages].puts(b.last.unparse) }
+    DSP.add_callback(:all) { |b| DSP[:messages].puts(b.last.unparse) }
 
     DSP.log(__time: 0)
     assert_equal "__time=0\n", File.read(path)
