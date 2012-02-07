@@ -74,7 +74,7 @@ class TestDSP < MiniTest::Unit::TestCase
 
   def test_callback
     buffer = []
-    DSP.add_callback(:all, lambda { true }) { |b| buffer << b.last }
+    DSP.add_callback(:all, lambda { true }) { |b| buffer << b }
     DSP.log(__time: 0)
     assert_equal [{:__time=>0}], buffer
   end
@@ -88,7 +88,7 @@ class TestDSP < MiniTest::Unit::TestCase
   def test_routing
     path = "log/messages"
     DSP.add_io :messages, path, mode: "w"
-    DSP.add_callback(:all) { |b| DSP[:messages].puts(b.last.unparse) }
+    DSP.add_callback(:all) { |b| DSP[:messages].puts(b.unparse) }
 
     DSP.log(__time: 0)
     assert_equal "__time=0\n", File.read(path)

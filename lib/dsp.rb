@@ -39,15 +39,13 @@ module DSP
 
           buff.last.merge!(__time: data[:__time], __bin: bin) if acc
         end
-      end
 
-      # call any callbacks (write, flush, rotate, store)
-      callbacks.each do |id, c|
-        buff = DSP[id]
+        # call callback
+        next unless c = callbacks[id]
         cond = c[:cond]
         blk  = c[:blk]
-        args = cond.arity == 1 ? [buff] : []
-        blk.call(buff) if cond.call(*args)
+        args = [[], [buff.last], [buff.last, buff]]
+        blk.call(*args[blk.arity]) if cond.call(*args[cond.arity])
       end
     end
   end
@@ -109,8 +107,6 @@ module DSP
     ios.each { |id, dev| dev.close unless dev == STDOUT }
   end
 end
-
-DSP.add_buffer(:all)
 
 class Hash
   def unparse
