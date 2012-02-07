@@ -81,11 +81,12 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_gaussian
+    srand 42
     rg = RandomGaussian.new(2.75, 1.47)
     vals = (1..100).map { rg.rand }
-    assert_in_delta 2.75, vals.mean,                0.5
-    assert_in_delta 2.15, vals.sample_variance,     0.5
-    assert_in_delta 1.47, vals.standard_deviation,  0.5
+    assert_in_delta 2.75, vals.mean,                0.26
+    assert_in_delta 2.15, vals.sample_variance,     0.03
+    assert_in_delta 1.47, vals.standard_deviation,  0.02
   end
 
   def test_callback
