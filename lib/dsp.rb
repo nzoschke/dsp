@@ -17,7 +17,7 @@ module DSP
 
     # filter (copy or modify and accumulate) data into buffers
     filters.each do |id, opts|
-      buff    = add_buffer(id)
+      buff    = DSP[id]
       period  = opts[:period]
       blk     = opts[:blk]
 
@@ -41,7 +41,7 @@ module DSP
 
     # call any callbacks (write, flush, rotate, store)
     callbacks.each do |id, c|
-      buff = add_buffer(id)
+      buff = DSP[id]
       cond = c[:cond]
       blk  = c[:blk]
       args = cond.arity == 1 ? [buff] : []
@@ -71,6 +71,7 @@ module DSP
   end
 
   def add_filter(id, period=nil, &blk)
+    add_buffer(id)
     filters[id] = { :period => period, :blk => blk }
   end
 
