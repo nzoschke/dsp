@@ -72,23 +72,6 @@ class TestDSP < MiniTest::Unit::TestCase
   def test_priority_sample
   end
 
-  def test_stats
-    vals = [1, 2, 2.2, 2.3, 4, 5]
-    assert_in_delta 16.5, vals.sum,                 0.01
-    assert_in_delta 2.75, vals.mean,                0.01
-    assert_in_delta 2.15, vals.sample_variance,     0.01
-    assert_in_delta 1.47, vals.standard_deviation,  0.01
-  end
-
-  def test_gaussian
-    srand 42
-    rg = RandomGaussian.new(2.75, 1.47)
-    vals = (1..100).map { rg.rand }
-    assert_in_delta 2.75, vals.mean,                0.26
-    assert_in_delta 2.15, vals.sample_variance,     0.03
-    assert_in_delta 1.47, vals.standard_deviation,  0.02
-  end
-
   def test_callback
     buffer = []
     DSP.callback(:all, lambda { true }) { |b| buffer << b.last }
@@ -109,5 +92,24 @@ class TestDSP < MiniTest::Unit::TestCase
 
     DSP.log(__time: 0)
     assert_equal "__time=0\n", File.read(path)
+  end
+end
+
+class TestStats < MiniTest::Unit::TestCase
+  def test_stats
+    vals = [1, 2, 2.2, 2.3, 4, 5]
+    assert_in_delta 16.5, vals.sum,                 0.01
+    assert_in_delta 2.75, vals.mean,                0.01
+    assert_in_delta 2.15, vals.sample_variance,     0.01
+    assert_in_delta 1.47, vals.standard_deviation,  0.01
+  end
+
+  def test_gaussian
+    srand 42
+    rg = RandomGaussian.new(2.75, 1.47)
+    vals = (1..100).map { rg.rand }
+    assert_in_delta 2.75, vals.mean,                0.26
+    assert_in_delta 2.15, vals.sample_variance,     0.03
+    assert_in_delta 1.47, vals.standard_deviation,  0.02
   end
 end
