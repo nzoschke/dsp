@@ -7,12 +7,29 @@ module DSP
 
     # filter (copy or sample) logs into buffers
     filters.each do |id, opts|
+      buff    = buffer(id)
       period  = opts[:period]
       pattern = opts[:pattern]
+      blk     = opts[:blk]
+
+      last  = buff.last
+      bin   = (data[:__time] / period.to_f).floor rescue 0
+
+      # match data to pattern or proc
+      if blk
+        default = { id => true, __time: data[:__time], __bin: bin }
+
+        if !last || last[:__bin] != bin
+          buff << blk.call(default, data) # append new bin
+        else
+          last.merge(blk.call(last, data))
+        end
+
+        next
+      end
 
       next if data.select { |k,v| pattern.keys.include? k } != pattern
 
-      buff = buffer(id)
       if period == nil  # copy
         buff << data
       else              # sample
@@ -82,6 +99,10 @@ module DSP
     filters[id] = { :period => period, :pattern => pattern }
   end
 
+  def filter2(id, period, &blk)
+    filters[id] = { :period => period, :blk => blk }
+  end
+
   def add_io(id, dev, opts={})
     if dev.is_a? IO
       ios[id] = dev
@@ -119,5 +140,15 @@ module DSP
 
   def close
     ios.each { |id, dev| dev.close unless dev == STDOUT }
+  end
+end
+
+class Hash
+  def match(h)
+    return true
+  end
+
+  def reverse_merge!(h)
+    replace(h.merge(self))
   end
 end
