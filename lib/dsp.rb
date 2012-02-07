@@ -144,6 +144,16 @@ end
 
 class Hash
   def match(h)
+    return false if keys & h.keys != h.keys
+
+    h.each do |k, v|
+      if v.is_a? Regexp
+        return false if !v.match(self[k].to_s)
+      else
+        return false if self[k] != v
+      end
+    end
+
     return true
   end
 
