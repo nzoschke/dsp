@@ -49,27 +49,6 @@ module DSP
     end
   end
 
-  # String Formatting
-  def unparse(data)
-    data.map do |(k, v)|
-      if (v == true)
-        k.to_s
-      elsif (v == false)
-        "#{k}=false"
-      elsif (v.is_a?(String) && v.include?("\""))
-        "#{k}='#{v}'"
-      elsif (v.is_a?(String) && (v !~ /^[a-zA-Z0-9\:\.\-\_]+$/))
-        "#{k}=\"#{v}\""
-      elsif (v.is_a?(String) || v.is_a?(Symbol))
-        "#{k}=#{v}"
-      elsif v.is_a?(Float)
-        "#{k}=#{format("%.3f", v)}"
-      elsif v.is_a?(Numeric) || v.is_a?(Class) || v.is_a?(Module)
-        "#{k}=#{v}"
-      end
-    end.compact.join(" ")
-  end
-
   # Internal Storage / Processing
   def buffer(id=:all)
     buffers[id] ||= []
@@ -91,6 +70,12 @@ module DSP
       ios[id] = IO.popen(dev, mode=opts[:mode] || "w")
     elsif dev.is_a? String
       ios[id] = File.open(dev, mode=opts[:mode] || "a")
+    end
+  end
+
+  def add_patch(h, &blk)
+    h.each do |k,v|
+      DSP.callback(k) { |b| io = DSP.ios[v]; io.puts(blk.call(b)); io.flush }
     end
   end
 
@@ -125,6 +110,26 @@ module DSP
 end
 
 class Hash
+  def unparse
+    self.map do |(k, v)|
+      if (v == true)
+        k.to_s
+      elsif (v == false)
+        "#{k}=false"
+      elsif (v.is_a?(String) && v.include?("\""))
+        "#{k}='#{v}'"
+      elsif (v.is_a?(String) && (v !~ /^[a-zA-Z0-9\:\.\-\_]+$/))
+        "#{k}=\"#{v}\""
+      elsif (v.is_a?(String) || v.is_a?(Symbol))
+        "#{k}=#{v}"
+      elsif v.is_a?(Float)
+        "#{k}=#{format("%.3f", v)}"
+      elsif v.is_a?(Numeric) || v.is_a?(Class) || v.is_a?(Module)
+        "#{k}=#{v}"
+      end
+    end.compact.join(" ")
+  end
+
   def match(h)
     return false if keys & h.keys != h.keys
 

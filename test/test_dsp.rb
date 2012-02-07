@@ -66,10 +66,10 @@ class TestDSP < MiniTest::Unit::TestCase
     ], DSP.buffer(:exec_time)
   end
 
-  def test_chain_sample
+  def test_chain_sampler
   end
 
-  def test_priority_sample
+  def test_priority_sampler
   end
 
   def test_callback
@@ -88,7 +88,7 @@ class TestDSP < MiniTest::Unit::TestCase
   def test_routing
     path = "log/messages"
     DSP.add_io :messages, path, mode: "w"
-    DSP.callback(:all) { |b| io = DSP.ios[:messages]; io.puts DSP.unparse(b.last); io.flush }
+    DSP.add_patch(:all => :messages) { |b| b.last.unparse }
 
     DSP.log(__time: 0)
     assert_equal "__time=0\n", File.read(path)
