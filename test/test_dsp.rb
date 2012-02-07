@@ -22,26 +22,35 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_filter_counter
-    DSP.filter(:execs_per_min, 60, { exec: true, at: :start })
+    DSP.filter2(:exec_per_min, 60) do |acc, data|
+      next unless data.match(exec: true, at: :start)
+      acc[:num] ||= 0
+      acc[:num]  += 1
+      acc
+    end
+
+    #DSP.filter(:execs_per_min, 60, { exec: true, at: :start })
 
     DSP.log(exec: true, at: :start,   __time: 0)
     DSP.log(exec: true, at: :finish,  __time: 1)
+    DSP.log(tick: true,               __time: 1)
     DSP.log(exec: true, at: :start,   __time: 2)
     DSP.log(exec: true, at: :error,   __time: 3)
     DSP.log(exec: true, at: :start,   __time: 60)
     DSP.log(exec: true, at: :finish,  __time: 61)
 
     assert_equal [
-      { execs_per_min: true, num: 2, __time: 0,  __bin: 0 },
-      { execs_per_min: true, num: 1, __time: 60, __bin: 1 }
-    ], DSP.buffer(:execs_per_min)
+      { exec_per_min: true, num: 2, __time: 2,  __bin: 0 },
+      { exec_per_min: true, num: 1, __time: 60, __bin: 1 }
+    ], DSP.buffer(:exec_per_min)
   end
 
   def test_filter_averager
     DSP.filter2(:exec_time, 60) do |acc, data|
       next unless data.match(exec: true, at: /finish|error/, elapsed: /./)
 
-      acc.reverse_merge!(num: 0, elapsed: 0) # defaults
+      acc[:num]     ||= 0 # defaults
+      acc[:elapsed] ||= 0
 
       acc[:num]     += 1
       acc[:elapsed] += data[:elapsed]

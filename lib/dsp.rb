@@ -18,12 +18,14 @@ module DSP
       # match data to pattern or proc
       if blk
         if last && last[:__bin] == bin
-          last.merge! blk.call(last, data)                    # accumulate in current bin
+          acc = blk.call(last, data)
+          last.merge! acc if acc                # accumulate in current bin
         else
-          buff << blk.call({ id => true, __bin: bin }, data)  # append new bin
+          acc = blk.call({ id => true }, data)
+          buff << acc if acc                    # append new bin
         end
 
-        buff.last[:__time] = data[:__time]
+        buff.last.merge!(__time: data[:__time], __bin: bin) if acc
         next
       end
 
