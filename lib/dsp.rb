@@ -12,50 +12,43 @@ module DSP
   extend self
 
   def log(*datas)
-    data = datas.inject(:merge)
-    data[:__time] ||= Time.now.to_f
-
-    # filter (copy or modify and accumulate) data into buffers
-    filters.each do |id, opts|
-      buff    = DSP[id]
-      period  = opts[:period]
-      blk     = opts[:blk]
-
-      last  = buff.last
-      bin   = (data[:__time] / period.to_f).floor rescue 0
-      
-      if !blk
-        buff << data
-      else
-        if last && last[:__bin] == bin
-          acc = blk.call(last, data)
-          last.merge! acc if acc                # accumulate in current bin
-        else
-          acc = blk.call({ id => true }, data)
-          buff << acc if acc                    # append new bin
-        end
-
-        buff.last.merge!(__time: data[:__time], __bin: bin) if acc
-      end
-    end
-
-    # call any callbacks (write, flush, rotate, store)
-    callbacks.each do |id, c|
-      buff = DSP[id]
-      cond = c[:cond]
-      blk  = c[:blk]
-      args = cond.arity == 1 ? [buff] : []
-      if cond.call(*args)
-        blk.call(buff)
-      end
-    end
-  end
-
-  def write(data)
     @@mtx ||= Mutex.new
     @@mtx.synchronize do
-      STDOUT.puts unparse(data)
-      STDOUT.flush
+      data = datas.inject(:merge)
+      data[:__time] ||= Time.now.to_f
+
+      # filter (copy or modify and accumulate) data into buffers
+      filters.each do |id, opts|
+        buff    = DSP[id]
+        period  = opts[:period]
+        blk     = opts[:blk]
+
+        last  = buff.last
+        bin   = (data[:__time] / period.to_f).floor rescue 0
+        
+        if !blk
+          buff << data
+        else
+          if last && last[:__bin] == bin
+            acc = blk.call(last, data)
+            last.merge! acc if acc                # accumulate in current bin
+          else
+            acc = blk.call({ id => true }, data)
+            buff << acc if acc                    # append new bin
+          end
+
+          buff.last.merge!(__time: data[:__time], __bin: bin) if acc
+        end
+      end
+
+      # call any callbacks (write, flush, rotate, store)
+      callbacks.each do |id, c|
+        buff = DSP[id]
+        cond = c[:cond]
+        blk  = c[:blk]
+        args = cond.arity == 1 ? [buff] : []
+        blk.call(buff) if cond.call(*args)
+      end
     end
   end
 
