@@ -20,9 +20,10 @@ module DSP
         default = { id => true, __time: data[:__time], __bin: bin }
 
         if !last || last[:__bin] != bin
-          buff << blk.call(default, data) # append new bin
+          buff << blk.call(default, data)   # append new bin
         else
-          last.merge(blk.call(last, data))
+          last.merge(blk.call(last, data))  # accumulate in current bin
+          last[:__time] = data[:__time]
         end
 
         next
