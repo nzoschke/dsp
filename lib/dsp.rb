@@ -143,3 +143,55 @@ class Hash
     replace(h.merge(self))
   end
 end
+
+module Enumerable
+  def sum
+    return self.inject(0){|accum, i| accum + i }
+  end
+
+  def mean
+    return self.sum / self.length.to_f
+  end
+
+  def sample_variance
+    m = self.mean
+    sum = self.inject(0){|accum, i| accum + (i - m) ** 2 }
+    return sum / (self.length - 1).to_f
+  end
+
+  def standard_deviation
+    return Math.sqrt(self.sample_variance)
+  end
+end
+
+class RandomGaussian
+  def initialize(mean, stddev, rand_helper = lambda { Kernel.rand })
+    @rand_helper = rand_helper
+    @mean = mean
+    @stddev = stddev
+    @valid = false
+    @next = 0
+  end
+
+  def rand
+    if @valid then
+      @valid = false
+      return @next
+    else
+      @valid = true
+      x, y = self.class.gaussian(@mean, @stddev, @rand_helper)
+      @next = y
+      return x
+    end
+  end
+
+  private
+  def self.gaussian(mean, stddev, rand)
+    theta = 2 * Math::PI * rand.call
+    rho = Math.sqrt(-2 * Math.log(1 - rand.call))
+    scale = stddev * rho
+    x = mean + scale * Math.cos(theta)
+    y = mean + scale * Math.sin(theta)
+    return x, y
+  end
+end

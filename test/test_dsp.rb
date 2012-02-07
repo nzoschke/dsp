@@ -21,7 +21,7 @@ class TestDSP < MiniTest::Unit::TestCase
     assert DSP.buffer.last[:__time] > 0
   end
 
-  def test_filter_counter
+  def test_counter
     DSP.filter(:exec_per_min, 60) do |acc, data|
       next unless data.match(exec: true, at: :start)
       acc[:num] ||= 0
@@ -43,7 +43,7 @@ class TestDSP < MiniTest::Unit::TestCase
     ], DSP.buffer(:exec_per_min)
   end
 
-  def test_filter_averager
+  def test_averager
     DSP.filter(:exec_time, 60) do |acc, data|
       next unless data.match(exec: true, at: /finish|error/, elapsed: /./)
 
@@ -64,6 +64,28 @@ class TestDSP < MiniTest::Unit::TestCase
       { exec_time: true, num: 2, elapsed: 6.5, avg: 3.25, __time: 3,  __bin: 0 },
       { exec_time: true, num: 1, elapsed: 1.1, avg: 1.10, __time: 61, __bin: 1 }
     ], DSP.buffer(:exec_time)
+  end
+
+  def test_chain_sample
+  end
+
+  def test_priority_sample
+  end
+
+  def test_stats
+    vals = [1, 2, 2.2, 2.3, 4, 5]
+    assert_in_delta 16.5, vals.sum,                 0.01
+    assert_in_delta 2.75, vals.mean,                0.01
+    assert_in_delta 2.15, vals.sample_variance,     0.01
+    assert_in_delta 1.47, vals.standard_deviation,  0.01
+  end
+
+  def test_gaussian
+    rg = RandomGaussian.new(2.75, 1.47)
+    vals = (1..100).map { rg.rand }
+    assert_in_delta 2.75, vals.mean,                0.5
+    assert_in_delta 2.15, vals.sample_variance,     0.5
+    assert_in_delta 1.47, vals.standard_deviation,  0.5
   end
 
   def test_callback
