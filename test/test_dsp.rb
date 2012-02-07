@@ -13,12 +13,12 @@ class TestDSP < MiniTest::Unit::TestCase
 
   def test_log_datas
     DSP.log({ a: true, b: true }, { foo: :bar }, { foo: :baz }, { __time: 0 })
-    assert_equal [{ a: true, b: true, foo: :baz, __time: 0 }], DSP.buffer
+    assert_equal [{ a: true, b: true, foo: :baz, __time: 0 }], DSP[:all]
   end
 
   def test_log_time
     DSP.log(a: true)
-    assert DSP.buffer.last[:__time] > 0
+    assert DSP[:all].last[:__time] > 0
   end
 
   def test_counter
@@ -40,7 +40,7 @@ class TestDSP < MiniTest::Unit::TestCase
     assert_equal [
       { exec_per_min: true, num: 2, __time: 2,  __bin: 0 },
       { exec_per_min: true, num: 1, __time: 60, __bin: 1 }
-    ], DSP.buffer(:exec_per_min)
+    ], DSP[:exec_per_min]
   end
 
   def test_averager
@@ -63,7 +63,7 @@ class TestDSP < MiniTest::Unit::TestCase
     assert_equal [
       { exec_time: true, num: 2, elapsed: 6.5, avg: 3.25, __time: 3,  __bin: 0 },
       { exec_time: true, num: 1, elapsed: 1.1, avg: 1.10, __time: 61, __bin: 1 }
-    ], DSP.buffer(:exec_time)
+    ], DSP[:exec_time]
   end
 
   def test_chain_sampler

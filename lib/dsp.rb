@@ -1,11 +1,11 @@
 module DSP
-  def [](id=nil)
-    @@refs ||= {}
+  def [](id)
+    @@refs ||= { }
     @@refs[id]
   end
 
   def []=(id, ref)
-    DSP[]
+    @@refs ||= { }
     @@refs[id] = ref
   end
 
@@ -17,7 +17,7 @@ module DSP
 
     # filter (copy or modify and accumulate) data into buffers
     filters.each do |id, opts|
-      buff    = buffer(id)
+      buff    = add_buffer(id)
       period  = opts[:period]
       blk     = opts[:blk]
 
@@ -41,7 +41,7 @@ module DSP
 
     # call any callbacks (write, flush, rotate, store)
     callbacks.each do |id, c|
-      buff = buffer(id)
+      buff = add_buffer(id)
       cond = c[:cond]
       blk  = c[:blk]
       args = cond.arity == 1 ? [buff] : []
@@ -60,8 +60,9 @@ module DSP
   end
 
   # Internal Storage / Processing
-  def buffer(id=:all)
+  def add_buffer(id)
     buffers[id] ||= []
+    DSP[id] = buffers[id]
   end
 
   def callback(id, cond=nil, &blk)
@@ -114,6 +115,8 @@ module DSP
     ios.each { |id, dev| dev.close unless dev == STDOUT }
   end
 end
+
+DSP.add_buffer(:all)
 
 class Hash
   def unparse
