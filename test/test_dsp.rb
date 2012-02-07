@@ -89,8 +89,6 @@ class TestDSP < MiniTest::Unit::TestCase
     path = "log/messages"
     DSP.add_io :messages, path, mode: "w"
     DSP.callback(:all) { |b| DSP[:messages].puts(b.last.unparse) }
-    #DSP.callback(:all) { |b| DSP.ios[:messages].puts(b.last.unparse) }
-    #DSP.add_patch(:all => :messages) { |b| b.last.unparse }
 
     DSP.log(__time: 0)
     assert_equal "__time=0\n", File.read(path)

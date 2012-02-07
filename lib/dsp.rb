@@ -85,12 +85,6 @@ module DSP
     DSP[id] = ios[id]
   end
 
-  def add_patch(h, &blk)
-    h.each do |k,v|
-      DSP.callback(k) { |b| io = DSP.ios[v]; io.puts(blk.call(b)); io.flush }
-    end
-  end
-
   def buffers
     @@buffers ||= {}
   end
