@@ -5,18 +5,18 @@ module DSP
     data = datas.inject(:merge)
     data[:__time] ||= Time.now.to_f
 
-    # filter (copy or sample) logs into buffers
+    # filter (copy or modify and accumulate) data into buffers
     filters.each do |id, opts|
       buff    = buffer(id)
       period  = opts[:period]
-      pattern = opts[:pattern]
       blk     = opts[:blk]
 
       last  = buff.last
       bin   = (data[:__time] / period.to_f).floor rescue 0
-
-      # match data to pattern or proc
-      if blk
+      
+      if !blk
+        buff << data
+      else
         if last && last[:__bin] == bin
           acc = blk.call(last, data)
           last.merge! acc if acc                # accumulate in current bin
@@ -26,22 +26,6 @@ module DSP
         end
 
         buff.last.merge!(__time: data[:__time], __bin: bin) if acc
-        next
-      end
-
-      next if data.select { |k,v| pattern.keys.include? k } != pattern
-
-      if period == nil  # copy
-        buff << data
-      else              # sample
-        l = buff.last
-        bin = (data[:__time] / period.to_f).floor
-        if l && l[:__bin] == bin
-          l[:num] += 1
-        else
-          data = { id => true, num: 1, __time: data[:__time], __bin: bin }
-          buff << data
-        end
       end
     end
 
@@ -96,11 +80,7 @@ module DSP
     callbacks[id] = { :cond => cond, :blk => blk }
   end
 
-  def filter(id, period, pattern)
-    filters[id] = { :period => period, :pattern => pattern }
-  end
-
-  def filter2(id, period, &blk)
+  def filter(id, period=nil, &blk)
     filters[id] = { :period => period, :blk => blk }
   end
 
@@ -136,7 +116,7 @@ module DSP
     @@filters   = nil
     @@ios       = nil
 
-    filter(:all, nil, {}) # every log goes to :all buffer
+    filter(:all) # every log goes to :all buffer
   end
 
   def close

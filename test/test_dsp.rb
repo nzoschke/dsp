@@ -22,14 +22,12 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_filter_counter
-    DSP.filter2(:exec_per_min, 60) do |acc, data|
+    DSP.filter(:exec_per_min, 60) do |acc, data|
       next unless data.match(exec: true, at: :start)
       acc[:num] ||= 0
       acc[:num]  += 1
       acc
     end
-
-    #DSP.filter(:execs_per_min, 60, { exec: true, at: :start })
 
     DSP.log(exec: true, at: :start,   __time: 0)
     DSP.log(exec: true, at: :finish,  __time: 1)
@@ -46,7 +44,7 @@ class TestDSP < MiniTest::Unit::TestCase
   end
 
   def test_filter_averager
-    DSP.filter2(:exec_time, 60) do |acc, data|
+    DSP.filter(:exec_time, 60) do |acc, data|
       next unless data.match(exec: true, at: /finish|error/, elapsed: /./)
 
       acc[:num]     ||= 0 # defaults
