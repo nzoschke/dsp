@@ -1,4 +1,14 @@
 module DSP
+  def [](id=nil)
+    @@refs ||= {}
+    @@refs[id]
+  end
+
+  def []=(id, ref)
+    DSP[]
+    @@refs[id] = ref
+  end
+
   extend self
 
   def log(*datas)
@@ -71,6 +81,8 @@ module DSP
     elsif dev.is_a? String
       ios[id] = File.open(dev, mode=opts[:mode] || "a")
     end
+    ios[id].sync = true
+    DSP[id] = ios[id]
   end
 
   def add_patch(h, &blk)
