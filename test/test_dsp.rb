@@ -21,6 +21,30 @@ class TestDSP < MiniTest::Unit::TestCase
     assert DSP[:all].last[:__time] > 0
   end
 
+  def test_callback
+    buffer = []
+    DSP.add_callback(:all, lambda { true }) { |b| buffer << b }
+    DSP.log(__time: 0)
+    assert_equal [{:__time=>0}], buffer
+  end
+
+  def test_io
+    DSP.add_io :stdout,   STDOUT
+    DSP.add_io :logger,   ["logger"]
+    DSP.add_io :messages, "log/messages"
+  end
+
+  def test_routing
+    path = "log/messages"
+    DSP.add_io :messages, path, mode: "w"
+    DSP.add_callback(:all) { |b| DSP[:messages].puts(b.unparse) }
+
+    DSP.log(__time: 0)
+    assert_equal "__time=0\n", File.read(path)
+  end
+end
+
+class TestDSPFilters < MiniTest::Unit::TestCase
   def test_counter
     DSP.add_filter(:exec_per_min, 60) do |acc, data|
       next unless data.match(exec: true, at: :start)
@@ -64,28 +88,6 @@ class TestDSP < MiniTest::Unit::TestCase
       { exec_time: true, num: 2, elapsed: 6.5, avg: 3.25, __time: 3,  __bin: 0 },
       { exec_time: true, num: 1, elapsed: 1.1, avg: 1.10, __time: 61, __bin: 1 }
     ], DSP[:exec_time]
-  end
-
-  def test_callback
-    buffer = []
-    DSP.add_callback(:all, lambda { true }) { |b| buffer << b }
-    DSP.log(__time: 0)
-    assert_equal [{:__time=>0}], buffer
-  end
-
-  def test_io
-    DSP.add_io :stdout,   STDOUT
-    DSP.add_io :logger,   ["logger"]
-    DSP.add_io :messages, "log/messages"
-  end
-
-  def test_routing
-    path = "log/messages"
-    DSP.add_io :messages, path, mode: "w"
-    DSP.add_callback(:all) { |b| DSP[:messages].puts(b.unparse) }
-
-    DSP.log(__time: 0)
-    assert_equal "__time=0\n", File.read(path)
   end
 end
 
