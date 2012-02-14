@@ -66,12 +66,6 @@ class TestDSP < MiniTest::Unit::TestCase
     ], DSP[:exec_time]
   end
 
-  def test_chain_sampler
-  end
-
-  def test_priority_sampler
-  end
-
   def test_callback
     buffer = []
     DSP.add_callback(:all, lambda { true }) { |b| buffer << b }
@@ -111,5 +105,16 @@ class TestStats < MiniTest::Unit::TestCase
     assert_in_delta 2.75, vals.mean,                0.26
     assert_in_delta 2.15, vals.sample_variance,     0.03
     assert_in_delta 1.47, vals.standard_deviation,  0.02
+  end
+
+  def test_meta_analysis
+    # http://stats.stackexchange.com/questions/3652/combining-two-confidence-intervals-point-estimates
+  end
+
+  def test_chain_sampler
+    # http://ilpubs.stanford.edu:8090/503/
+  end
+
+  def test_priority_sampler
   end
 end
